@@ -44,6 +44,9 @@ export function increaseAccountBalance(account: Account, token: Token, amount: B
 export function decreaseAccountBalance(account: Account, token: Token, amount: BigDecimal): AccountBalance {
   let balance = getOrCreateAccountBalance(account, token)
   balance.amount = balance.amount.minus(amount)
+  if (balance.amount.lt(ONE.toBigDecimal())) {
+    token.holderCount = token.holderCount.minus(ONE)
+  }
 
   return balance
 }
