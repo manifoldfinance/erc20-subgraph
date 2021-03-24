@@ -1,67 +1,79 @@
-import { BigDecimal, Bytes, ethereum } from '@graphprotocol/graph-ts'
+import { BigDecimal, Bytes, ethereum } from '@graphprotocol/graph-ts';
 
-import { Account, AccountBalance, AccountBalanceSnapshot, Token } from '../../generated/schema'
+import { Account, AccountBalance, AccountBalanceSnapshot, Token } from '../../generated/schema';
 
-import { ZERO } from '../helpers/number'
+import { ZERO } from '../helpers/number';
 
 export function getOrCreateAccount(accountAddress: Bytes): Account {
-  let accountId = accountAddress.toHex()
-  let existingAccount = Account.load(accountId)
+  let accountId = accountAddress.toHex();
+  let existingAccount = Account.load(accountId);
 
   if (existingAccount != null) {
-    return existingAccount as Account
+    return existingAccount as Account;
   }
 
-  let newAccount = new Account(accountId)
-  newAccount.address = accountAddress
+  let newAccount = new Account(accountId);
+  newAccount.address = accountAddress;
 
-  return newAccount
+  return newAccount;
 }
 
 function getOrCreateAccountBalance(account: Account, token: Token): AccountBalance {
-  let balanceId = account.id + '-' + token.id
-  let previousBalance = AccountBalance.load(balanceId)
+  let balanceId = account.id + '-' + token.id;
+  let previousBalance = AccountBalance.load(balanceId);
 
   if (previousBalance != null) {
-    return previousBalance as AccountBalance
+    return previousBalance as AccountBalance;
   }
 
-  let newBalance = new AccountBalance(balanceId)
-  newBalance.account = account.id
-  newBalance.token = token.id
-  newBalance.amount = ZERO.toBigDecimal()
+  let newBalance = new AccountBalance(balanceId);
+  newBalance.account = account.id;
+  newBalance.token = token.id;
+  newBalance.amount = ZERO.toBigDecimal();
 
-  return newBalance
+  return newBalance;
 }
 
-export function increaseAccountBalance(account: Account, token: Token, amount: BigDecimal): AccountBalance {
-  let balance = getOrCreateAccountBalance(account, token)
-  balance.amount = balance.amount.plus(amount)
+export function increaseAccountBalance(
+  account: Account,
+  token: Token,
+  amount: BigDecimal,
+): AccountBalance {
+  let balance = getOrCreateAccountBalance(account, token);
+  balance.amount = balance.amount.plus(amount);
 
-  return balance
+  return balance;
 }
 
-export function decreaseAccountBalance(account: Account, token: Token, amount: BigDecimal): AccountBalance {
-  let balance = getOrCreateAccountBalance(account, token)
-  balance.amount = balance.amount.minus(amount)
+export function decreaseAccountBalance(
+  account: Account,
+  token: Token,
+  amount: BigDecimal,
+): AccountBalance {
+  let balance = getOrCreateAccountBalance(account, token);
+  balance.amount = balance.amount.minus(amount);
   if (balance.amount.lt(ONE.toBigDecimal())) {
-    token.holderCount = token.holderCount.minus(ONE)
+    token.holderCount = token.holderCount.minus(ONE);
   }
 
-  return balance
+  return balance;
 }
 
-export function saveAccountBalanceSnapshot(balance: AccountBalance, eventId: string, event: ethereum.Event): void {
-  let snapshot = new AccountBalanceSnapshot(balance.id + '-' + event.block.timestamp.toString())
-  snapshot.account = balance.account
-  snapshot.token = balance.token
-  snapshot.amount = balance.amount
+export function saveAccountBalanceSnapshot(
+  balance: AccountBalance,
+  eventId: string,
+  event: ethereum.Event,
+): void {
+  let snapshot = new AccountBalanceSnapshot(balance.id + '-' + event.block.timestamp.toString());
+  snapshot.account = balance.account;
+  snapshot.token = balance.token;
+  snapshot.amount = balance.amount;
 
-  snapshot.block = event.block.number
-  snapshot.transaction = event.transaction.hash
-  snapshot.timestamp = event.block.timestamp
+  snapshot.block = event.block.number;
+  snapshot.transaction = event.transaction.hash;
+  snapshot.timestamp = event.block.timestamp;
 
-  snapshot.event = eventId
+  snapshot.event = eventId;
 
-  snapshot.save()
+  snapshot.save();
 }

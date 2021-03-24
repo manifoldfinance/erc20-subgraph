@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "lint:ts": "npx prettier --write . '**/*.ts'",
     "auth": "graph auth https://api.thegraph.com/deploy/",
     "codegen": "graph codegen",
     "build": "graph build",
@@ -13,6 +14,7 @@
   },
   "devDependencies": {
     "@graphprotocol/graph-cli": "0.18.0",
-    "@graphprotocol/graph-ts": "0.18.1"
+    "@graphprotocol/graph-ts": "0.18.1",
+    "@protofire/subgraph-toolkit": "^0.1.1"
   }
 }
